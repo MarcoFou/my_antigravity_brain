@@ -1,15 +1,21 @@
 # Especificación Técnica de Arquitectura Dual (Google Antigravity)
 
-Este documento describe en detalle la arquitectura de sincronización dividida (**Dual Brain Architecture**) implementada en Google Antigravity para entornos multi-dispositivo y desarrollo asistido por IA.
+Este documento describe la especificación técnica de la arquitectura de sincronización dividida (**Dual Brain Architecture**) implementada en Google Antigravity para entornos multi-dispositivo.
 
 ---
 
-## 1. Motivación y Problema Resolutivo
+## 1. Motivación y Racional de Sincronización
 
-Al trabajar con sistemas agenticos avanzados y modelos de contexto amplio (ej. Gemini 1.5 Pro / 3.6 Flash / Pro en Google Antigravity):
-1. **Contaminación del Contexto:** Almacenar logs de conversación, fragmentos temporales y artefactos dentro del repositorio de código provoca ruido constante en los índices de código y consumo excesivo de tokens.
-2. **Conflictos de Git:** Múltiples máquinas sincronizando historiales de chat locales generan constantes conflictos de merge (`git merge conflicts`).
-3. **Consumo Eficiente de Suscripción:** Al sincronizar el estado dinámico vía almacenamiento en nube (Google Drive), las sesiones se reanudan entre PCs sin duplicar búsquedas complejas o peticiones a la API.
+### ¿Por qué dos canales de sincronización distintos?
+
+1. **GitHub es para Hitos Estáticos:**  
+   Git y GitHub están optimizados para guardar versiones estables y revisiones atómicas del código fuente y las reglas de negocio. No fueron diseñados para procesar mutaciones por segundo generadas por registros de chat o artefactos de memoria de IA.
+
+2. **Google Drive es para el "Trabajo Sucio" Dinámico:**  
+   Google Drive opera con sincronización silenciosa y continua en segundo plano. Esto permite que los historiales de chat, archivos temporales de sesión (`scratch/`) y artefactos de memoria conversacional persistan instantáneamente entre la PC Principal y otras máquinas, **sin requerir commits manuales ni provocar conflictos de fusión (`merge conflicts`)**.
+
+3. **Prevención de Contaminación de Contexto:**  
+   Al aislar el estado conversacional en Google Drive, los índices del proyecto en Git permanecen limpios y centrados únicamente en el código funcional, reduciendo el consumo de tokens y evitando respuestas imprecisas del modelo.
 
 ---
 
@@ -24,12 +30,12 @@ flowchart LR
 
     subgraph Cloud Services [Servicios en la Nube]
         B1 <-->|git push / pull| GH[(GitHub Private Repo)]
-        D1 <-->|Auto-Sync| GD[(Google Drive Sync)]
+        D1 <-->|Sync Background Silencioso| GD[(Google Drive Sync)]
     end
 
     subgraph PC2 [Estación de Trabajo 2]
         GH <-->|git push / pull| A2[Git Local]
-        GD <-->|Auto-Sync| D2[Symlink Local]
+        GD <-->|Sync Background Silencioso| D2[Symlink Local]
         A2 <--> B2[Cerebro Estructural]
         D2 <--> C2[Cerebro Dinámico]
     end
@@ -37,55 +43,31 @@ flowchart LR
 
 ### 🧠 A. Cerebro Estructural (Git / GitHub)
 * **Propósito:** Mantener la lógica determinista, las reglas de negocio, los agentes, las habilidades y el código ejecutable.
-* **Control de Versiones:** Git estricto con commits descriptivos y atómicos.
+* **Control de Versiones:** Git estricto con commits descriptivos y manuales para hitos funcionales.
 * **Ruta de Repositorio:** `https://github.com/MarcoFou/my_antigravity_brain.git`
-* **Elementos Contenidos:**
-  - Código fuente del proyecto (`src/`, `lib/`, `scripts/`).
-  - Definición de Habilidades (`SKILL.md`) y Agentes (`agents/`).
-  - Prompts base y archivos de sistema (`INSTRUCCION_GLOBAL.md`).
-  - Configuraciones del proyecto (`package.json`, `pyproject.toml`, etc.).
 
 ### ⚡ B. Cerebro Dinámico (Google Drive & Windows Symlinks)
 * **Propósito:** Persistir el estado conversacional, memoria a corto y mediano plazo, artefactos de sesión y archivos temporales.
 * **Mecanismo de Enlace:** Enlace simbólico de directorio (`SymbolicLink`) apuntando a la carpeta sincronizada por Google Drive para escritorio.
 * **Ruta Predeterminada en Antigravity:**  
   `C:\Users\<USER>\.gemini\antigravity\brain\<WORKSPACE_ID>`
-* **Ruta Destino en Google Drive:**  
-  `G:\Mi unidad\AntigravityBrain\<WORKSPACE_ID>` (o equivalente según el perfil).
-* **Elementos Contenidos:**
-  - Artefactos dinámicos (`implementation_plan.md`, `walkthrough.md`, `scratch/`).
-  - Logs de ejecución y trascripción conversacional (`transcript.jsonl`).
-  - Cachés de ejecución y bases de datos temporales (SQLite, vector caches, etc.).
 
 ---
 
 ## 3. Matriz de Decisiones de Almacenamiento
 
-| Tipo de Archivo / Recurso | Destino Correcto | ¿Pasa por Git? |
+| Tipo de Archivo / Recurso | Destino Correcto | Mecanismo de Sync |
 | :--- | :--- | :--- |
-| Código de aplicación (`*.js`, `*.py`, `*.cs`, `*.html`) | Cerebro Estructural | **SÍ** |
-| Archivos `SKILL.md` y definiciones de herramientas | Cerebro Estructural | **SÍ** |
-| Documentación del proyecto (`README.md`, `ARCHITECTURE.md`) | Cerebro Estructural | **SÍ** |
-| `implementation_plan.md` y `walkthrough.md` | Cerebro Dinámico (Drive) | **NO** |
-| Scratchpad (`brain/<id>/scratch/*`) | Cerebro Dinámico (Drive) | **NO** |
-| Logs de comandos y transcripts de la sesión | Cerebro Dinámico (Drive) | **NO** |
-| Archivos de entorno con secretos (`.env`) | Ninguno (Usar `.env.example`) | **NO** |
+| Código de aplicación (`*.js`, `*.py`, `*.cs`, `*.html`) | Cerebro Estructural | Commit manual en Git |
+| Archivos `SKILL.md` y definiciones de agentes | Cerebro Estructural | Commit manual en Git |
+| Documentación del proyecto (`README.md`, `ARCHITECTURE.md`) | Cerebro Estructural | Commit manual en Git |
+| Historiales de chat (`*.transcript.jsonl`) | Cerebro Dinámico | Auto-Sync Google Drive |
+| Planes y Walkthroughs (`implementation_plan.md`) | Cerebro Dinámico | Auto-Sync Google Drive |
+| Scratchpad (`brain/<id>/scratch/*`) | Cerebro Dinámico | Auto-Sync Google Drive |
 
 ---
 
-## 4. Estrategia de Portabilidad Multi-PC
+## 4. Estrategia Multi-PC y Lenguaje
 
-Para evitar romper enlaces entre diferentes usuarios o letras de unidad de Windows (`C:\Users\F1995` vs `C:\Users\OtroUsuario`):
-
-1. **Variables de Entorno y Rutas Relativas:**  
-   Todo script de build o automatización dentro del repositorio de Git debe utilizar `%USERPROFILE%` o variables de entorno relativas al proyecto.
-2. **Estructura Estándar del Enlace Simbólico:**
-   En cada PC de desarrollo se creará un enlace simbólico que apunte desde la carpeta local de Antigravity (`%USERPROFILE%\.gemini\antigravity\brain\<WORKSPACE_ID>`) a la carpeta compartida en Google Drive.
-
----
-
-## 5. Mantenimiento y Buenas Prácticas
-
-- **Frecuencia de Sync Git:** Ejecutar `git pull` al iniciar la jornada en un nuevo PC y `git push` al finalizar modificaciones estructurales.
-- **Limpieza de Caché:** El Cerebro Dinámico se sincroniza automáticamente en background mediante Google Drive Client. No requiere commits manuales.
-- **Monitoreo de `.gitignore`:** Asegurarse de que ningún submódulo cree directorios de log dentro de la ruta rastreada por Git.
+- **Rutas Relativas:** Todo script o configuración dentro del repositorio Git debe emplear `%USERPROFILE%` o variables de entorno relativas.
+- **Idioma Oficial:** Toda la documentación, respuestas y comentarios en código deben generarse en **Español**.

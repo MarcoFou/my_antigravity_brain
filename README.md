@@ -8,13 +8,15 @@ Repositorio central y privado para la arquitectura, sincronización y directivas
 
 ---
 
-## 📌 Propósito del Sistema
+## 💡 El Porqué de la Arquitectura (Racional de Sincronización)
 
-El entorno de trabajo opera bajo una **Arquitectura de Sincronización Dividida (Dual Brain Architecture)** diseñada para:
-1. **Prevenir la contaminación del contexto** en las sesiones de trabajo con IA.
-2. **Optimizar el consumo de cuota** de la suscripción Google AI Plus / Gemini.
-3. **Garantizar la coherencia y portabilidad muti-PC** (desarrollo transparente entre múltiples computadoras).
-4. **Separar código determinista de memoria dinámica** evitando commits accidentales de logs, estados de sesión o cachés.
+El sistema comprende la naturaleza distinta de los archivos para optimizar los flujos de trabajo y evitar ruido:
+
+1. **GitHub (Cerebro Estructural):** Se utiliza *únicamente* para versionar hitos de desarrollo estático (código, reglas, arquitecturas y habilidades). Git no está diseñado para mutaciones constantes por segundo.
+2. **Google Drive (Cerebro Dinámico):** Sincronización silenciosa en segundo plano. Se encarga del "trabajo sucio" de mantener vivos los historiales de chat, cachés y el contexto temporal entre las diferentes PCs sin requerir commits manuales ni generar conflictos de fusión (`merge conflicts`).
+
+> [!CAUTION]
+> **PROHIBICIÓN ESTRICTA:** Bajo ninguna circunstancia el agente o desarrollador debe hacer commit (`git add`/`git commit`) sobre historiales de chat, logs o archivos temporales de sesión.
 
 ---
 
@@ -30,14 +32,14 @@ graph TD
         AG -->|Código Fuente| CODE[Código & Submódulos]
         AG -->|Reglas & Agentes| SKILLS[SKILL.md / Prompts Base]
         AG -->|Configuración| CFG[Arquitectura & Workflows]
-        CODE & SKILLS & CFG -->|Commit / Push| GITREPO[GitHub: my_antigravity_brain]
+        CODE & SKILLS & CFG -->|Commit Limpio / Hitos| GITREPO[GitHub: my_antigravity_brain]
     end
 
     subgraph Cerebro Dinamico [Cerebro Dinámico - Google Drive]
         AG -->|Estado de Sesión| SESS[Conversaciones & Logs]
         AG -->|Artefactos de Memoria| ART[implementation_plan / walkthrough]
         AG -->|Cachés & Temp| CACHE[Bases de Datos Temporales]
-        SESS & ART & CACHE -->|Enlace Simbólico| GDRIVE[Google Drive Sync Folder]
+        SESS & ART & CACHE -->|Sync Silencioso en Background| GDRIVE[Google Drive Sync Folder]
     end
 ```
 
@@ -49,8 +51,8 @@ graph TD
 | :--- | :--- | :--- |
 | **Tecnología** | Git Repository (`my_antigravity_brain`) | Google Drive + Windows Symlinks (`mklink /D`) |
 | **Ubicación Física** | Local Repo (Clonado) | `C:\Users\<USER>\.gemini\antigravity\brain\<WORKSPACE_ID>` |
-| **Contenido** | • Código fuente de proyectos (`urban_flow`, etc.)<br>• Reglas de agentes y habilidades (`SKILL.md`)<br>• Prompts del sistema y configuraciones global<br>• Archivos `.gitignore` estructurados | • Historiales de conversación y logs<br>• Artefactos de sesión (`implementation_plan.md`, `walkthrough.md`)<br>• Archivos de memoria temporal, cachés de runtime |
-| **Criterio de Exclusión** | Nunca subir archivos de estado o temporales. | No versionar código fuente determinista. |
+| **Contenido** | • Código fuente de proyectos (`urban_flow`, etc.)<br>• Reglas de agentes y habilidades (`SKILL.md`)<br>• Prompts del sistema y configuraciones globales<br>• Archivos `.gitignore` estructurados | • Historiales de conversación y logs<br>• Artefactos de sesión (`implementation_plan.md`, `walkthrough.md`)<br>• Archivos de memoria temporal, cachés de runtime |
+| **Criterio de Exclusión** | Solo hitos de desarrollo estático. | Sincronización automática de datos mutables. |
 
 ---
 
@@ -61,35 +63,16 @@ graph TD
   `C:\Users\F1995\.gemini\antigravity\brain\427f9d73-6715-470c-a8e5-f8fb11a2d5a1`
 * **Ruta de Repositorio Estructural:**  
   `https://github.com/MarcoFou/my_antigravity_brain.git`
+* **Idioma Oficial de Operación:** Español (`es-ES` / `es-MX`).
 
 ---
 
 ## 📑 Documentación Detallada
 
-Para una comprensión profunda y la configuración rápida de nuevos equipos, consulta la siguiente documentación:
-
 * 📐 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Especificación técnica detallada de la arquitectura dual, flujos de datos y diseño del enlace simbólico.
 * 🤖 **[AGENTS_GUIDE.md](./AGENTS_GUIDE.md)**: Instrucción global y directivas obligatorias para los agentes de Inteligencia Artificial.
 * 🖥️ **[SETUP_MULTI_PC.md](./SETUP_MULTI_PC.md)**: Guía paso a paso y script automatizado PowerShell (`setup_dual_brain.ps1`) para desplegar esta arquitectura en una PC nueva.
-* 📋 **[templates/](./templates/)**: Plantillas reutilizables para `.gitignore` y comandos de inicio de sesión.
-
----
-
-## ⚡ Guía Rápida de Despliegue en Nueva PC
-
-1. **Clonar este repositorio:**
-   ```powershell
-   git clone https://github.com/MarcoFou/my_antigravity_brain.git
-   cd my_antigravity_brain
-   ```
-
-2. **Ejecutar el script de enlace simbólico (PowerShell Administrador):**
-   ```powershell
-   .\setup_dual_brain.ps1 -DrivePath "G:\Mi unidad\AntigravityBrain"
-   ```
-
-3. **Iniciar Antigravity y Cargar la Instrucción Global:**  
-   Proporcionar al agente el contenido de [`templates/INSTRUCCION_GLOBAL.md`](./templates/INSTRUCCION_GLOBAL.md) al iniciar un nuevo workspace o hilo de trabajo.
+* 📋 **[templates/](./templates/)**: Plantillas reutilizables para `.gitignore` y la instrucción global del sistema.
 
 ---
 
