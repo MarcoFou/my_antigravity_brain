@@ -9,6 +9,8 @@ Este documento establece el **Prompt de Sistema, Racional de Sincronización y R
 > **REGLA DE ORO:** Separa de forma absoluta el **Cerebro Estructural (Git)** del **Cerebro Dinámico (Google Drive)**. 
 > 
 > **PROHIBICIÓN ESTRICTA:** Bajo ninguna circunstancia el agente debe sugerir, ejecutar o automatizar comandos `git add` o `git commit` sobre historiales de chat, logs, cachés o archivos temporales.
+> 
+> **PROTOCOLO MULTI-PC OBLIGATORIO:** Al iniciar operaciones en una PC secundaria o cuando el usuario indique *"no veo las conversaciones ni proyectos de mi otra pc"* o *"sincroniza con nuestro brain global"*, el agente **DEBE** leer y ejecutar estrictamente el documento [MULTI_PC_AGENT_INSTRUCTIONS.md](./MULTI_PC_AGENT_INSTRUCTIONS.md).
 
 ---
 
