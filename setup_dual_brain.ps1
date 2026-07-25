@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Script de configuración de Enlace Simbólico para la Arquitectura Dual de Google Antigravity.
+    Script de configuración de Enlace Simbólico / Unión de Directorio (Junction) para la Arquitectura Dual de Google Antigravity.
 
 .DESCRIPTION
-    Crea el enlace simbólico entre la carpeta local de Antigravity Brain y el directorio de Google Drive.
+    Crea la unión de directorio (Junction Link) entre la carpeta local de Antigravity Brain y el directorio de Google Drive sin requerir permisos de administrador.
 
 .PARAMETER WorkspaceId
     El ID del workspace activo (Por defecto: 427f9d73-6715-470c-a8e5-f8fb11a2d5a1).
@@ -30,11 +30,11 @@ $targetDriveDir = Join-Path $DrivePath $WorkspaceId
 
 Write-Host "[1/3] Verificando directorio objetivo en Google Drive..." -ForegroundColor Yellow
 if (-not (Test-Path $targetDriveDir)) {
-    Write-Host "Creating target folder in Drive: $targetDriveDir" -ForegroundColor Gray
+    Write-Host "Creando carpeta en Drive: $targetDriveDir" -ForegroundColor Gray
     New-Item -ItemType Directory -Force -Path $targetDriveDir | Out-Null
-    Write-Host "✓ Directorio en Drive creado exitosamente." -ForegroundColor Green
+    Write-Host "[OK] Directorio en Drive creado exitosamente." -ForegroundColor Green
 } else {
-    Write-Host "✓ Directorio en Drive ya existe." -ForegroundColor Green
+    Write-Host "[OK] Directorio en Drive ya existe." -ForegroundColor Green
 }
 
 Write-Host "[2/3] Verificando ruta local de Antigravity Brain..." -ForegroundColor Yellow
@@ -46,27 +46,26 @@ if (-not (Test-Path $parentLocalDir)) {
 if (Test-Path $localBrainDir) {
     $item = Get-Item $localBrainDir
     if ($item.Attributes -match "ReparsePoint") {
-        Write-Host "✓ El enlace simbólico ya existe en: $localBrainDir" -ForegroundColor Green
+        Write-Host "[OK] El enlace (Junction/Symlink) ya existe en: $localBrainDir" -ForegroundColor Green
     } else {
-        Write-Host "⚠️ Advertencia: Existe una carpeta física local en $localBrainDir." -ForegroundColor Red
-        Write-Host "Respaldando carpeta local existente..." -ForegroundColor Gray
-        $backupPath = "${localBrainDir}_backup_$(Get-Date -Format 'yyyyMMddHHmmss')"
-        Move-Item -Path $localBrainDir -Destination $backupPath
-        Write-Host "✓ Respaldado en: $backupPath" -ForegroundColor Green
+        Write-Host "[INFO] Moviendo contenido local existente a Google Drive..." -ForegroundColor Gray
+        Copy-Item -Path "$localBrainDir\*" -Destination $targetDriveDir -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $localBrainDir -Recurse -Force
     }
 }
 
 if (-not (Test-Path $localBrainDir)) {
-    Write-Host "[3/3] Creando Enlace Simbólico (Symbolic Link)..." -ForegroundColor Yellow
+    Write-Host "[3/3] Creando Enlace de Unión (Directory Junction)..." -ForegroundColor Yellow
     try {
-        New-Item -ItemType SymbolicLink -Path $localBrainDir -Target $targetDriveDir -ErrorAction Stop | Out-Null
+        # Junction link funciona sin requerir permisos de administrador en Windows
+        New-Item -ItemType Junction -Path $localBrainDir -Target $targetDriveDir -ErrorAction Stop | Out-Null
         Write-Host "==========================================================" -ForegroundColor Green
-        Write-Host " SUCCESS: Enlace Simbólico Creado Correctamente!          " -ForegroundColor Green
+        Write-Host " SUCCESS: Enlace Creado Correctamente!                     " -ForegroundColor Green
         Write-Host " Local  : $localBrainDir                                  " -ForegroundColor Gray
         Write-Host " Target : $targetDriveDir                                 " -ForegroundColor Gray
         Write-Host "==========================================================" -ForegroundColor Green
     } catch {
-        Write-Host "❌ Error al crear enlace simbólico: $_" -ForegroundColor Red
-        Write-Host "Sugerencia: Ejecuta PowerShell como Administrador o activa el Modo Desarrollador en Windows." -ForegroundColor Yellow
+        Write-Host "Intentando via cmd mklink /J..." -ForegroundColor Yellow
+        cmd /c mklink /J "$localBrainDir" "$targetDriveDir"
     }
 }
