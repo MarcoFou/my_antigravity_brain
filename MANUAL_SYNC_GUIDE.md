@@ -46,9 +46,10 @@ flowchart TD
 | Parámetro | Valor por Defecto / Configuración |
 | :--- | :--- |
 | **Repositorio Remoto (GitHub)** | `https://github.com/MarcoFou/my_antigravity_brain.git` |
-| **Workspace ID Activo** | `427f9d73-6715-470c-a8e5-f8fb11a2d5a1` |
-| **Ruta Local de Cerebro Dinámico** | `$env:USERPROFILE\.gemini\antigravity\brain\427f9d73-6715-470c-a8e5-f8fb11a2d5a1` |
-| **Ruta en Google Drive** | `G:\Mi unidad\AntigravityBrain\427f9d73-6715-470c-a8e5-f8fb11a2d5a1` |
+| **Ruta Base de Brains en Drive** | `G:\Mi unidad\AntigravityBrain` |
+| **Ruta Base de Conversaciones en Drive** | `G:\Mi unidad\AntigravityConversations` |
+| **Ruta Local de Brains** | `$env:USERPROFILE\.gemini\antigravity\brain` |
+| **Ruta Local de Conversaciones** | `$env:USERPROFILE\.gemini\antigravity\conversations` |
 | **Idioma Oficial de Operación** | Español (`es-ES` / `es-MX`) |
 
 ---
