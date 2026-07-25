@@ -70,6 +70,7 @@ graph TD
 ## 📑 Documentación Detallada
 
 * 📐 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Especificación técnica detallada de la arquitectura dual, flujos de datos y diseño del enlace simbólico.
+* 🔄 **[MANUAL_SYNC_GUIDE.md](./MANUAL_SYNC_GUIDE.md)**: Instrucciones paso a paso del uso del sistema, flujo de `git pull` y `git push` manual, y resolución de conflictos.
 * 🤖 **[AGENTS_GUIDE.md](./AGENTS_GUIDE.md)**: Instrucción global y directivas obligatorias para los agentes de Inteligencia Artificial.
 * 🖥️ **[SETUP_MULTI_PC.md](./SETUP_MULTI_PC.md)**: Guía paso a paso y script automatizado PowerShell (`setup_dual_brain.ps1`) para desplegar esta arquitectura en una PC nueva.
 * 📋 **[templates/](./templates/)**: Plantillas reutilizables para `.gitignore` y la instrucción global del sistema.
